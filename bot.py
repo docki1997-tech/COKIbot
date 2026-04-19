@@ -1,25 +1,16 @@
-import asyncio
+import telebot
 import random
 import time
 import sqlite3
 import os
 
-from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message
-from aiogram.filters import Command
-
 API_TOKEN = os.getenv("8724617956:AAH-sjzN6fZjcjxpz9fHpeJsGEqS2NijeaA")
 
-bot = Bot(token=API_TOKEN)
-dp = Dispatcher()
+bot = telebot.TeleBot(API_TOKEN)
 
-COOLDOWN = 20 * 60 * 60  # 20 часов
+COOLDOWN = 20 * 60 * 60
 
-# =========================
-# DATABASE
-# =========================
-
-conn = sqlite3.connect("bot.db")
+conn = sqlite3.connect("bot.db", check_same_thread=False)
 cursor = conn.cursor()
 
 cursor.execute("""
@@ -55,25 +46,18 @@ def update_user(user_id, size, last):
     conn.commit()
 
 
-# =========================
-# COMMANDS
-# =========================
-
-@dp.message(Command("start"))
-async def start(message: Message):
-    await message.answer(
-        "😏 Привіт! Я твій бот\nНапиши /boobs щоб грати 🔥"
-    )
+@bot.message_handler(commands=['start'])
+def start(message):
+    bot.reply_to(message, "😏 Привіт! Напиши /boobs щоб грати")
 
 
-@dp.message(Command("boobs"))
-async def boobs(message: Message):
+@bot.message_handler(commands=['boobs'])
+def boobs(message):
     user_id = message.from_user.id
     name = message.from_user.first_name
     now = time.time()
 
     user = get_user(user_id)
-
     size = user[1]
     last = user[2]
 
@@ -82,8 +66,9 @@ async def boobs(message: Message):
         hours = int(remaining // 3600)
         minutes = int((remaining % 3600) // 60)
 
-        await message.answer(
-            f"⏳ Спокійно 😏\nСпробуй через {hours} год {minutes} хв"
+        bot.reply_to(
+            message,
+            f"⏳ Спробуй через {hours} год {minutes} хв"
         )
         return
 
@@ -102,16 +87,7 @@ async def boobs(message: Message):
     else:
         text = f"😐 {name}, без змін"
 
-    await message.answer(f"{text}\n📏 Тепер: {size} см")
+    bot.reply_to(message, f"{text}\n📏 Тепер: {size} см")
 
 
-# =========================
-# START
-# =========================
-
-async def main():
-    await dp.start_polling(bot)
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+bot.infinity_polling()
