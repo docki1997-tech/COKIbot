@@ -1,19 +1,22 @@
-import os
+import asyncio
 import random
 import time
 import sqlite3
-from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
+import os
 
-API_TOKEN = os.getenv("8724617956:AAH-sjzN6fZjcjxpz9fHpeJsGEqS2NijeaA")
+from aiogram import Bot, Dispatcher, F
+from aiogram.types import Message
+from aiogram.filters import Command
+
+API_TOKEN = os.getenv("API_TOKEN")
 
 bot = Bot(token=API_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
 COOLDOWN = 20 * 60 * 60  # 20 часов
 
 # =========================
-# DATABASE (SQLite)
+# DATABASE
 # =========================
 
 conn = sqlite3.connect("bot.db")
@@ -26,7 +29,6 @@ CREATE TABLE IF NOT EXISTS users (
     last REAL
 )
 """)
-
 conn.commit()
 
 
@@ -57,16 +59,15 @@ def update_user(user_id, size, last):
 # COMMANDS
 # =========================
 
-@dp.message_handler(commands=['start'])
-async def start(message: types.Message):
-    await message.reply(
-        "😏 Привіт! Я твій бот\n"
-        "Напиши /boobs щоб грати 🔥"
+@dp.message(Command("start"))
+async def start(message: Message):
+    await message.answer(
+        "😏 Привіт! Я твій бот\nНапиши /boobs щоб грати 🔥"
     )
 
 
-@dp.message_handler(commands=['boobs'])
-async def boobs(message: types.Message):
+@dp.message(Command("boobs"))
+async def boobs(message: Message):
     user_id = message.from_user.id
     name = message.from_user.first_name
     now = time.time()
@@ -76,15 +77,13 @@ async def boobs(message: types.Message):
     size = user[1]
     last = user[2]
 
-    # cooldown
     if now - last < COOLDOWN:
         remaining = COOLDOWN - (now - last)
         hours = int(remaining // 3600)
         minutes = int((remaining % 3600) // 60)
 
-        await message.reply(
-            f"⏳ Спокійно 😏\n"
-            f"Спробуй через {hours} год {minutes} хв"
+        await message.answer(
+            f"⏳ Спокійно 😏\nСпробуй через {hours} год {minutes} хв"
         )
         return
 
@@ -103,15 +102,16 @@ async def boobs(message: types.Message):
     else:
         text = f"😐 {name}, без змін"
 
-    await message.reply(
-        f"{text}\n"
-        f"📏 Тепер: {size} см"
-    )
+    await message.answer(f"{text}\n📏 Тепер: {size} см")
 
 
 # =========================
-# START BOT
+# START
 # =========================
+
+async def main():
+    await dp.start_polling(bot)
+
 
 if __name__ == "__main__":
-    executor.start_polling(dp)
+    asyncio.run(main())
