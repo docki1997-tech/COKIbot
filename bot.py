@@ -4,7 +4,7 @@ import time
 import sqlite3
 import os
 
-API_TOKEN = os.getenv("8724617956:AAH-sjzN6fZjcjxpz9fHpeJsGEqS2NijeaA")
+API_TOKEN = os.getenv("8724617956:AAHMNujCaIwa-nmtGzy-4rPW0RQqG6GfZHQ")
 
 bot = telebot.TeleBot(API_TOKEN)
 
