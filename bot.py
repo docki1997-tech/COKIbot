@@ -5,7 +5,7 @@ import sqlite3
 from aiogram import Bot, Dispatcher, types
 from aiogram.utils import executor
 
-API_TOKEN = os.getenv("8427704476:AAGVLTlazYs_XcrlM1lIZ3SxNYKxlTY06uA")
+API_TOKEN = os.getenv("8724617956:AAH-sjzN6fZjcjxpz9fHpeJsGEqS2NijeaA")
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher(bot)
